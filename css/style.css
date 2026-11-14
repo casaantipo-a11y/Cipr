@@ -1,0 +1,599 @@
+/* ==========================================================================
+   AVEN — one-page site
+   ========================================================================== */
+
+:root {
+  --bg: #0C0E11;
+  --bg-2: #10141a;
+  --ink: #F4F6F8;
+  --ink-2: #8794a6;          /* muted blue-grey */
+  --ink-3: #606d80;
+  --accent: #1B6FD6;         /* sampled from the AVEN logo */
+  --accent-hi: #3b8af0;
+  --line: rgba(244, 246, 248, .14);
+  --line-2: rgba(244, 246, 248, .08);
+  --danger: #ff4d62;
+
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-text: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  --gutter: clamp(20px, 5vw, 80px);
+  --maxw: 1440px;
+  --header-h: 72px;          /* logo/button row — text position */
+  --header-ext: 28px;        /* header extends this far below that row */
+  --header-full: calc(var(--header-h) + var(--header-ext));
+  --ease: cubic-bezier(.2, .7, .2, 1);
+
+  --t-title: clamp(2.75rem, 7.2vw, 6rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: var(--header-full); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+/* film grain over the whole page (fixed, so it never adds scroll; doesn't intercept clicks/selection) */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 100;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .035;
+  mix-blend-mode: overlay;
+}
+
+h1, h2, h3, p, ul, ol { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font: inherit; color: inherit; }
+img, svg { display: block; }
+
+:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 3px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ---------- reveal on scroll ---------- */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .8s var(--ease), transform .8s var(--ease);
+  transition-delay: var(--d, 0s);
+}
+.js .reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+}
+
+/* ---------- shared type ---------- */
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--t-title);
+  line-height: .95;
+  letter-spacing: -.045em;
+  text-transform: uppercase;
+}
+.title--center { text-align: center; }
+
+.bullet {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border: 1.5px solid var(--accent);
+  transform: rotate(45deg);
+  flex: none;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  --h: 46px;
+  display: inline-flex; align-items: center; justify-content: center;
+  height: var(--h);
+  padding: 0 28px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .9rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.btn--ghost { border-color: var(--accent); color: var(--ink); }
+.btn--ghost:hover { background: var(--accent); box-shadow: 0 0 0 6px rgba(27, 111, 214, .18); }
+.btn--ghost:active { transform: scale(.97); }
+
+.btn--solid { background: var(--accent); color: #fff; --h: 56px; padding: 0 56px; font-size: 1rem; }
+.btn--solid:hover { background: var(--ink); color: var(--bg); transform: translateY(-2px); }
+.btn--solid:active { transform: scale(.97); }
+.btn--solid[disabled] { opacity: .55; cursor: progress; pointer-events: none; }
+
+/* ---------- header ---------- */
+.header {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  height: var(--header-full);
+  display: flex; align-items: flex-start; /* content stays pinned to the top, only the bar grows downward */
+  border-bottom: 1px solid transparent;
+  transition: background .3s var(--ease), backdrop-filter .3s var(--ease), border-color .3s var(--ease);
+}
+.header.is-scrolled {
+  background: rgba(12, 14, 17, .72);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom-color: var(--line-2);
+}
+.header__in { height: var(--header-h); display: flex; align-items: center; justify-content: space-between; }
+
+.logo { display: inline-flex; align-items: center; gap: 12px; color: var(--accent); }
+.logo__mark { width: 29px; height: 30px; transition: transform .5s var(--ease); }
+.logo__word {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.875rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--ink);
+}
+.logo:hover .logo__mark { transform: rotate(-8deg) scale(1.06); }
+
+/* ---------- hero ---------- */
+.hero {
+  --hero-t: clamp(5.5rem, 14vw, 17rem);   /* AVEN */
+  --hero-s: clamp(1.25rem, 3.2vw, 3rem);  /* MARKETING AGENCY */
+  --hero-l: clamp(.85rem, 1.5vw, 1.25rem);/* WORKING IN THE iGAMING VERTICAL */
+  /* how much the visible-5mm line gaps took out of the stack; given back below so bottom-anchored AVEN doesn't move */
+  --hero-comp: calc(.068 * var(--hero-t) + .75 * var(--hero-s) + .3 * var(--hero-l));
+  position: relative;
+  /* composition is bottom-anchored; shortening the hero by 3cm lifts it 3cm and pulls #verticals up with it (no gap) */
+  min-height: calc(100vh - 3cm); min-height: calc(100svh - 3cm);
+  display: flex; align-items: flex-end;
+  /* padding-bottom compensates the tighter 5mm gaps below (old pb + old gaps + old line padding + 1px border − 2×5mm) so AVEN stays put */
+  padding: calc(var(--header-full) + 24px) 0 calc(clamp(32px, 4vw, 56px) + clamp(16px, 2.4vw, 32px) + clamp(20px, 3vw, 40px) + clamp(16px, 2vw, 24px) + 1px - 10mm + var(--hero-comp));
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero__decor { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+/* faceted gem — sized to fit fully inside the hero (below the header) */
+.hero__gem {
+  --fig: min(calc(100vh - 3cm - var(--header-full) - 24px), calc(100svh - 3cm - var(--header-full) - 24px), 62vw, 880px);
+  position: absolute; right: var(--gutter); top: calc(var(--header-full) + 8px);
+  width: var(--fig); height: var(--fig);
+  transform: translateX(-3mm) scale(1.12); /* a bit larger and 3mm left (5mm left, then 2mm back right); visual only, hero layout unchanged */
+}
+.gem { width: 100%; height: 100%; }
+.hero__gem::before, .hero__gem::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
+.hero__gem::before { /* wide, dim halo */
+  inset: -12%;
+  background: radial-gradient(circle, rgba(27, 111, 214, .12) 0%, transparent 62%);
+}
+.hero__gem::after { /* narrow, bright halo */
+  inset: 18%;
+  background: radial-gradient(circle, rgba(59, 138, 240, .16) 0%, transparent 58%);
+}
+.gem__shine polygon, .gem__sweep, .gem__spark path { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  /* core and halo breathe in counter-phase: the glow "flows" between them */
+  .gem__pulse { animation: gem-breathe 7s ease-in-out infinite alternate; }
+  .hero__gem::after { animation: gem-breathe 7s ease-in-out infinite alternate-reverse; }
+
+  /* facets flare one after another, clockwise — reads as the stone slowly turning under light */
+  .gem__shine polygon { animation: facet-glow 14s linear infinite; }
+  .gem__shine polygon:nth-child(2) { animation-delay: 1.75s; }
+  .gem__shine polygon:nth-child(3) { animation-delay: 3.5s; }
+  .gem__shine polygon:nth-child(4) { animation-delay: 5.25s; }
+  .gem__shine polygon:nth-child(5) { animation-delay: 7s; }
+  .gem__shine polygon:nth-child(6) { animation-delay: 8.75s; }
+  .gem__shine polygon:nth-child(7) { animation-delay: 10.5s; }
+  .gem__shine polygon:nth-child(8) { animation-delay: 12.25s; }
+
+  /* specular band sweeps across every ~9s */
+  .gem__sweep { animation: gem-sweep 9s cubic-bezier(.45, 0, .4, 1) infinite; }
+}
+@keyframes gem-breathe { from { opacity: .5; } to { opacity: 1; } }
+@keyframes facet-glow {
+  0%, 24%, 100% { opacity: 0; }
+  12% { opacity: 1; }
+}
+@keyframes gem-sweep {
+  0% { transform: translateX(0); opacity: 1; }
+  24%, 100% { transform: translateX(730px); opacity: 1; }
+}
+.gem__spark.on path { animation: gem-spark .55s ease-out; }
+@keyframes gem-spark {
+  0% { opacity: 0; transform: scale(.2) rotate(0deg); }
+  35% { opacity: 1; transform: scale(1) rotate(20deg); }
+  100% { opacity: 0; transform: scale(.4) rotate(40deg); }
+}
+
+.hero__in { position: relative; top: 2mm; } /* text block nudged 2mm down; hero height and layout unchanged */
+.hero__title {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: var(--hero-t);
+  line-height: .82;
+  letter-spacing: -.06em;
+  margin-left: -.04em;
+  text-transform: uppercase;
+}
+/* Visible gaps AVEN → MARKETING AGENCY → WORKING… are exactly 5mm of empty space between the letters:
+   the margin subtracts the font's own blank space (measured for Space Grotesk, in em of each line):
+   below AVEN .068em, above/below MARKETING AGENCY .35em/.40em, above WORKING… .30em */
+.hero__sub {
+  margin-top: calc(5mm - .068 * var(--hero-t) - .35em);
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--hero-s);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent-hi);
+}
+.hero__line {
+  margin-top: calc(5mm - .4 * var(--hero-s) - .3em);
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--hero-l);
+  letter-spacing: .2em;
+  color: var(--ink-2);
+}
+.hero__line::before { /* hairline anchor to the left of the bullet */
+  content: ""; flex: none; width: clamp(28px, 4vw, 64px); height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+/* ---------- sections ---------- */
+.section { position: relative; padding: clamp(48px, 6vw, 88px) 0; }
+
+/* section joints: gradient hairline with a small diamond node in the middle */
+.section::before, .footer::before, .footer__bar::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+  pointer-events: none;
+}
+.section::after, .footer::after, .footer__bar::after {
+  content: ""; position: absolute; top: 0; left: 50%;
+  width: 7px; height: 7px; margin: -4px 0 0 -3.5px;
+  background: var(--bg); border: 1px solid rgba(27, 111, 214, .7);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* soft blue glows (same family as the hero's centre diamond) */
+.glow { position: absolute; z-index: -1; pointer-events: none; }
+#ftds { isolation: isolate; }
+.glow--map { inset: 0; background: radial-gradient(ellipse 48% 42% at 52% 60%, rgba(27, 111, 214, .07), transparent 70%); }
+
+/* verticals */
+#verticals { padding-top: 5mm; padding-bottom: 5mm; }
+/* 5mm of empty space from the text to the cards: minus the blank space under the "VERTICALS" baseline (.12em of the title) */
+.head { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; align-items: start; margin-bottom: calc(5mm - .12 * var(--t-title)); }
+.head .title { grid-column: 1 / span 8; }
+.manifest {
+  grid-column: 9 / span 4;
+  position: relative; padding-left: 23px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(.95rem, 1.35vw, 1.25rem);
+  line-height: 1.35; letter-spacing: .02em;
+  align-self: end;
+}
+.manifest .bullet { position: absolute; left: 0; top: .5em; }
+/* desktop: last line of the manifest sits on the baseline of "VERTICALS" */
+@media (min-width: 1025px) {
+  .head .title, .head .manifest { align-self: last baseline; }
+}
+
+.verticals { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(12px, 1.6vw, 24px); }
+.vcard { display: block; }
+.vcard__box {
+  position: relative; display: grid; place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  overflow: hidden;
+  transition: border-color .3s var(--ease), color .3s var(--ease), transform .4s var(--ease), background .3s var(--ease);
+}
+.vcard__box::before { /* diamond watermark that grows on hover */
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 70%; aspect-ratio: 1;
+  border: 1px solid var(--line-2);
+  transform: translate(-50%, -50%) rotate(45deg) scale(.7);
+  transition: transform .6s var(--ease), border-color .3s var(--ease);
+}
+.vcard__n {
+  position: absolute; top: 12px; left: 14px;
+  font-family: var(--font-display); font-weight: 500; font-size: .75rem; line-height: 1;
+  letter-spacing: .08em; font-feature-settings: "tnum"; font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  transition: color .3s var(--ease);
+}
+.vcard:hover .vcard__n { color: var(--accent-hi); }
+.vdots { display: none; }
+.vcard__icon { position: relative; width: 46%; height: 46%; transition: transform .5s var(--ease); }
+.vcard__label {
+  display: block; margin-top: 18px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(.95rem, 1.5vw, 1.4rem);
+  letter-spacing: .08em; text-transform: uppercase;
+  transition: color .3s var(--ease);
+}
+.vcard:hover .vcard__box, .vcard:focus-within .vcard__box { border-color: var(--accent); color: var(--accent-hi); transform: translateY(-6px); background: rgba(27, 111, 214, .06); }
+.vcard:hover .vcard__box::before { border-color: rgba(27, 111, 214, .5); transform: translate(-50%, -50%) rotate(45deg) scale(1.05); }
+.vcard:hover .vcard__icon { transform: scale(1.08); }
+.vcard:hover .vcard__label { color: var(--accent-hi); }
+
+/* what we do */
+/* #what → #ftds joint: padding-bottom + padding-top = 5mm in total (2.5mm each side of the divider) */
+#what { padding-top: 5mm; padding-bottom: 2.5mm; }
+#ftds { padding-top: 2.5mm; }
+#what .title { margin-top: 10mm; margin-bottom: clamp(24px, 3vw, 40px); } /* full-width section title, same as FTDs GENERATED */
+.what { --step-pad: clamp(22px, 2.6vw, 36px); display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+.what__main { grid-column: 1 / span 8; }
+.what__side { grid-column: 9 / span 4; }
+/* desktop: side column starts on the same hairline as N°01 */
+@media (min-width: 1025px) {
+  .what__side { padding-top: var(--step-pad); border-top: 1px solid var(--line-2); }
+}
+
+.steps { display: grid; } /* no closing line under N°03; lines between the steps are the steps' border-top */
+.step { display: grid; grid-template-columns: clamp(64px, 9vw, 140px) 1fr; gap: 24px; align-items: baseline; padding: var(--step-pad) 0; border-top: 1px solid var(--line-2); }
+.step__n { font-family: var(--font-display); font-weight: 500; font-size: clamp(1rem, 1.6vw, 1.5rem); letter-spacing: .06em; color: var(--ink-2); }
+.step__t { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.25rem, 2.6vw, 2.25rem); line-height: 1.15; letter-spacing: -.01em; text-transform: uppercase; max-width: 22ch; }
+.step__t em { font-style: normal; color: var(--accent-hi); }
+.step:hover .step__n { color: var(--accent-hi); }
+.step { transition: border-color .3s var(--ease); }
+.step:hover { border-top-color: var(--accent); }
+
+.sidetitle { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.1rem, 1.8vw, 1.6rem); line-height: 1.2; letter-spacing: .02em; text-transform: uppercase; }
+.gets { margin-top: 2mm; display: grid; gap: 18px; } /* 2mm from the bottom edge of "AT THE SAME TIME YOU GET:" */
+.gets li {
+  position: relative; padding-left: 26px;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(.9rem, 1.15vw, 1.1rem); line-height: 1.35; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--ink);
+  transition: color .25s var(--ease), transform .25s var(--ease);
+}
+.gets li::before { content: ""; position: absolute; left: 3px; top: .5em; width: 7px; height: 7px; border: 1.5px solid var(--accent); transform: rotate(45deg); transition: background .25s var(--ease); }
+.gets li:hover { color: var(--accent-hi); transform: translateX(4px); }
+.gets li:hover::before { background: var(--accent); }
+
+/* map */
+#ftds .title { margin-bottom: clamp(24px, 3vw, 40px); }
+.map { position: relative; width: 100%; aspect-ratio: 950 / 560; }
+.map__dots, .map__lines { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map__dots { fill: #4a5d78; }
+.map__dots circle { transition: fill .3s; }
+.map__lit { fill: var(--accent-hi); }
+.map__lines line { stroke: rgba(27, 111, 214, .55); stroke-width: 1; vector-effect: non-scaling-stroke; transition: stroke .25s var(--ease); }
+.map__lines line.is-active { stroke: var(--accent-hi); stroke-width: 1.5; }
+.map__layer { position: absolute; inset: 0; }
+
+.pin {
+  position: absolute; width: 11px; height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  background: var(--bg); border: 1.5px solid var(--accent-hi);
+  transform: rotate(45deg);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease);
+}
+.pin.is-active { background: var(--accent-hi); box-shadow: 0 0 0 6px rgba(27, 111, 214, .25); }
+.pin__n { display: none; }
+
+.plate {
+  position: absolute; transform: translate(-50%, -50%);
+  min-width: 150px;
+  padding: 10px 16px 11px;
+  background: rgba(12, 14, 17, .94);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  text-align: left;
+  cursor: default;
+  transition: background .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);
+}
+.plate__name { display: block; font-family: var(--font-display); font-weight: 500; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.plate__val { display: block; margin-top: 2px; font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; letter-spacing: -.01em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.plate.is-active, .plate:hover { background: rgba(27, 111, 214, .16); border-color: var(--accent-hi); box-shadow: 0 0 0 5px rgba(27, 111, 214, .12); }
+
+.legend { display: none; }
+
+/* form */
+/* clip sideways only, so the joint diamond on the top hairline isn't cut (old browsers fall back to hidden) */
+.section--form {
+  overflow: hidden; overflow-x: clip; overflow-y: visible; padding-bottom: clamp(56px, 6vw, 88px);
+  /* the decor diamonds are cut at the section's top/bottom edges (no spilling onto #ftds / the footer);
+     the notch at the top centre keeps the divider's diamond node uncut */
+  clip-path: polygon(0 0, calc(50% - 8px) 0, calc(50% - 8px) -8px, calc(50% + 8px) -8px, calc(50% + 8px) 0, 100% 0, 100% 100%, 0 100%);
+}
+#contact { padding-top: 5mm; padding-bottom: 5mm; } /* id beats .section--form */
+.form-decor { position: absolute; top: 50%; width: min(34vw, 520px); color: rgba(244, 246, 248, .22); transform: translateY(-50%); pointer-events: none; }
+.form-decor svg { width: 100%; height: auto; overflow: visible; }
+.form-decor .acc { stroke: var(--accent); }
+.form-decor--l { left: -9vw; }
+.form-decor--r { right: calc(min(34vw, 520px) * -.33); } /* cropped by the screen edge, but clearly visible */
+@media (prefers-reduced-motion: no-preference) {
+  .form-decor svg { animation: spin-a 160s linear infinite; }
+  .form-decor--r svg { animation-direction: reverse; }
+}
+@keyframes spin-a { to { transform: rotate(405deg); } }
+.form-strip { display: none; }
+
+/* 5mm of empty space from "WRITE US" to the first placeholder: minus the title's blank space under the baseline (.12em)
+   and the placeholder's offset inside the input (2px padding + 6px font space) */
+.form { position: relative; width: min(100%, 480px); margin: calc(5mm - .12 * var(--t-title) - 8px) auto 0; display: grid; justify-items: center; }
+/* rows: 12px under each line holds the REQUIRED / INVALID EMAIL message, then 2px + font space to the next placeholder (~20px total) */
+.field { position: relative; width: 100%; padding-bottom: 12px; }
+.field::after { /* focus line draws in left → right over the hairline */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 12px; height: 1px;
+  background: var(--accent-hi);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .5s var(--ease);
+  pointer-events: none;
+}
+.field:focus-within::after { transform: scaleX(1); }
+.field.is-bad::after { background: var(--danger); }
+.field__in {
+  display: block; width: 100%;
+  padding: 2px 0 12px;
+  background: transparent; border: 0; border-bottom: 1px solid var(--line);
+  border-radius: 0; text-align: left; box-shadow: none; -webkit-appearance: none; appearance: none;
+  font-family: var(--font-text); font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink); caret-color: var(--accent-hi);
+  transition: border-color .25s var(--ease), color .25s var(--ease);
+}
+.field__in::placeholder { color: var(--ink-3); opacity: 1; transition: color .25s; }
+.field__in:hover { border-bottom-color: rgba(244, 246, 248, .35); }
+.field__in:focus { outline: none; }
+.field__in:focus::placeholder { color: var(--ink-2); }
+.field__in[type="email"] { text-transform: none; }
+/* the comment box can't be shorter than 52px (the autosize in main.js keeps that minimum), so the extra 12px goes
+   above its text and is pulled back with a negative margin: the row then looks exactly like the others */
+.field__in--area { resize: none; overflow: hidden; min-height: 52px; padding-top: 14px; margin-top: -12px; }
+.field__err { position: absolute; left: 0; right: 0; bottom: 0; text-align: left; font-size: .65rem; line-height: 1; letter-spacing: .14em; color: var(--danger); text-transform: uppercase; }
+.field.is-bad .field__in { border-bottom-color: var(--danger); }
+.field.is-bad .field__in::placeholder { color: var(--danger); }
+.field.is-bad .field__in { color: var(--danger); }
+.form .btn { margin-top: 8px; }
+
+.hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.form__status { margin-top: 20px; min-height: 1.5em; text-align: center; font-size: .95rem; letter-spacing: .03em; color: var(--ink-2); }
+/* empty status reserves no space (so #contact ends 5mm under SEND); it stays rendered, so the live region still announces */
+.form__status:empty { margin-top: 0; min-height: 0; }
+.form__status.is-ok { color: var(--ink); }
+.form__status.is-err { color: var(--danger); }
+.form.is-sent .field, .form.is-sent .btn { display: none; }
+.form.is-sent .form__status { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.25rem, 2.4vw, 1.75rem); color: var(--ink); line-height: 1.25; margin-top: 0; padding: 32px 0; }
+.form.is-sent .form__status::before { content: ""; display: block; width: 14px; height: 14px; margin: 0 auto 24px; background: var(--accent); transform: rotate(45deg); }
+
+/* footer */
+.footer { position: relative; isolation: isolate; padding: 1cm 0; }
+.glow--footer { left: 0; right: 0; bottom: 0; height: 70%; background: radial-gradient(ellipse 55% 75% at 50% 100%, rgba(27, 111, 214, .07), transparent 72%); }
+/* lifted so LET'S TALK + button sit vertically centred between the footer's top hairline and the © bar hairline:
+   top space = 1cm padding + 3mm kicker nudge + ~3.5px bullet offset, bottom space = bar margin; shift by half the difference */
+.footer__cta { position: relative; top: calc((1cm + 3mm + 3.5px - clamp(20px, 2vw, 28px)) / -2); display: grid; justify-items: center; gap: 16px; }
+.footer__kicker {
+  position: relative; left: calc(7mm - 3cm - 5mm); top: 3mm; /* nudged from the centred position (net 28mm left, 3mm down); layout unaffected */
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--font-display); font-weight: 500; font-size: .8rem; letter-spacing: .24em; color: var(--ink-2);
+}
+/* main footer CTA: a larger two-line .btn--solid (CTA + handle) with a Telegram plane; hover/active come from .btn--solid */
+.btn--tg {
+  height: auto; min-height: 72px; max-width: 100%;
+  padding: 14px clamp(24px, 3.5vw, 44px);
+  gap: 16px; text-align: left;
+  font-size: clamp(.85rem, 1.4vw, 1.15rem);
+}
+.btn--tg__icon { position: relative; left: -3mm; width: 28px; height: 28px; flex: none; transition: transform .35s var(--ease); } /* plane nudged 3mm left; button size and text untouched */
+.btn--tg:hover .btn--tg__icon { transform: translate(3px, -3px); }
+.btn--tg__text { display: grid; gap: 4px; }
+.btn--tg__cta { line-height: 1.15; }
+.btn--tg__nick { font-family: var(--font-text); font-weight: 500; font-size: .8rem; letter-spacing: .04em; text-transform: none; line-height: 1.2; opacity: .8; }
+
+.footer__bar {
+  position: relative;
+  margin-top: clamp(20px, 2vw, 28px); padding-top: 16px;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  font-family: var(--font-display); font-weight: 500; font-size: .85rem; letter-spacing: .12em; color: var(--ink-2);
+}
+.footer__mark { width: 22px; height: 23px; color: var(--accent); }
+/* back-to-top: a hairline diamond; the arrow inside stays upright */
+.up { position: relative; justify-self: end; width: 56px; height: 56px; padding: 0; border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: color .25s; }
+.up::before {
+  content: ""; position: absolute; inset: 9px;
+  border: 1px solid var(--line); transform: rotate(45deg);
+  transition: border-color .25s var(--ease), background .25s var(--ease), transform .35s var(--ease);
+}
+.up svg { position: relative; width: 20px; height: 20px; transition: transform .3s var(--ease); }
+.up:hover { color: var(--accent-hi); }
+.up:hover::before { border-color: var(--accent); background: rgba(27, 111, 214, .1); transform: rotate(45deg) scale(1.06); }
+.up:hover svg { transform: translateY(-3px); }
+.up:active::before { transform: rotate(45deg) scale(.94); }
+
+/* ---------- tablet ---------- */
+@media (max-width: 1024px) {
+  .verticals { grid-template-columns: repeat(3, 1fr); row-gap: 32px; }
+  .what__main { grid-column: 1 / -1; }
+  .what__side { grid-column: 1 / -1; margin-top: 64px; }
+  .gets { grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+  .head .title { grid-column: 1 / -1; }
+  .manifest { grid-column: 1 / span 8; padding-top: 0; }
+  .head { margin-bottom: calc(5mm - 5px); } /* manifest is the last line now; 5px = its blank space under the baseline */
+  .step__t { max-width: 30ch; }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  :root { --header-h: 64px; }
+  .btn--ghost { --h: 40px; padding: 0 20px; font-size: .8rem; }
+  .logo__mark { width: 25px; height: 26px; }
+  .logo__word { font-size: 1.625rem; }
+
+  /* hero is top-anchored here (height follows content), so tighter gaps need no compensation */
+  .hero { --hero-t: 27vw; --hero-l: .74rem; --hero-comp: 0px; }
+  /* figure sits right under the header bar; hero height follows the figure, so no dead black band above or below it */
+  .hero { --fig: min(calc(100vh - 3cm - var(--header-full) - 24px), calc(100svh - 3cm - var(--header-full) - 24px), calc(100vw - 2 * var(--gutter))); min-height: 0; padding-top: calc(var(--header-h) + var(--fig) + 8px); }
+  .hero__gem { --fig: inherit; right: var(--gutter); top: calc(var(--header-h) - 2px); transform: scale(1.12); } /* centred full-width here: no side shift */
+  .hero__line { margin-top: calc(5mm - .4 * var(--hero-s) - .17em); letter-spacing: .14em; align-items: center; gap: 10px; } /* small line: the 9px bullet sets its top, .17em */
+  .hero__line::before { width: 20px; }
+
+  .manifest { grid-column: 1 / -1; }
+
+  .verticals {
+    display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
+    padding-bottom: 8px; scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .verticals::-webkit-scrollbar { display: none; }
+  .vcard { flex: 0 0 43%; scroll-snap-align: start; } /* 47% left only ~13px of card 3 at 375px; 43% makes it clearly peek */
+  .vcard:last-child { margin-right: calc(var(--gutter) * 1); }
+  .vdots { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+  .vdots i { width: 7px; height: 7px; border: 1px solid var(--ink-3); transform: rotate(45deg); transition: background .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease); }
+  .vdots i.is-on { background: var(--accent); border-color: var(--accent); transform: rotate(45deg) scale(1.25); }
+
+  .what__side { margin-top: 32px; }
+  .gets { grid-template-columns: 1fr; }
+  .step { grid-template-columns: 56px 1fr; gap: 12px; }
+
+  .btn--tg { min-height: 64px; padding: 12px 22px; gap: 12px; }
+  .btn--tg__icon { width: 24px; height: 24px; left: -.5mm; } /* desktop offset −3mm would crowd the pill's rounded edge; same +2mm step applied here */
+  .footer__bar { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; font-size: .72rem; letter-spacing: .08em; }
+  .up { justify-self: center; }
+}
+
+/* ---------- compact map + form decor (<= 900px) ---------- */
+@media (max-width: 900px) {
+  /* map: markers become numbered pins, plates move into a list below */
+  .plate, .map__lines { display: none; }
+  .pin { width: 20px; height: 20px; margin: -10px 0 0 -10px; display: grid; place-items: center; background: var(--bg); }
+  .pin__n { display: block; transform: rotate(-45deg); font-family: var(--font-display); font-weight: 600; font-size: 10px; line-height: 1; color: var(--ink); }
+  .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-top: 32px; }
+  .legend li { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 3px; }
+  .legend__n { grid-row: span 2; width: 22px; height: 22px; display: grid; place-items: center; border: 1.5px solid var(--accent-hi); transform: rotate(45deg); font-family: var(--font-display); font-weight: 600; font-size: 10px; }
+  .legend__n > span { transform: rotate(-45deg); }
+  .legend__name { font-family: var(--font-display); font-weight: 500; font-size: .62rem; letter-spacing: .1em; color: var(--ink-2); text-transform: uppercase; line-height: 1.2; }
+  .legend__val { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+
+  /* form on mobile — like the reference: wide underlined rows + pattern strip at the bottom */
+  .section--form, #contact { padding-bottom: 0; }
+  .form-decor { display: none; }
+  .form { width: min(100%, 560px); }
+  .form-strip { display: block; height: 180px; margin-top: 64px; border-top: 1px solid var(--line); opacity: .3; position: relative; }
+  .form-strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+}
+
+@media (max-width: 380px) {
+  .legend { grid-template-columns: 1fr 1fr; }
+}
