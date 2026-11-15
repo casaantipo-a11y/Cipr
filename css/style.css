@@ -501,6 +501,10 @@ img, svg { display: block; }
 .btn--tg__text { display: grid; gap: 4px; }
 .btn--tg__cta { line-height: 1.15; }
 .btn--tg__nick { font-family: var(--font-text); font-weight: 500; font-size: .8rem; letter-spacing: .04em; text-transform: none; line-height: 1.2; opacity: .8; }
+/* second Telegram handle under the button */
+.footer__alt { margin: -2px 0 0; font-family: var(--font-display); font-weight: 500; font-size: .75rem; letter-spacing: .16em; line-height: 1.2; color: var(--ink-2); }
+.footer__alt a { color: var(--accent-hi); letter-spacing: .04em; text-decoration: none; text-underline-offset: 3px; }
+.footer__alt a:hover, .footer__alt a:focus-visible { text-decoration: underline; }
 
 .footer__bar {
   position: relative;
@@ -577,6 +581,7 @@ img, svg { display: block; }
   /* column shrinks to the button's width and stays centred; LET'S TALK starts at the button's left edge, ~10px above it */
   .footer__cta { justify-content: center; justify-items: start; }
   .footer__kicker { left: 5mm; top: calc(6px + 1mm); }
+  .footer__alt { justify-self: center; } /* the column is start-aligned here (LET'S TALK on the left); the handle stays centred under the button */
   .btn--tg { min-height: 64px; padding: 12px 22px; gap: 12px; }
   .btn--tg__icon { width: 24px; height: 24px; left: -.5mm; } /* desktop offset −3mm would crowd the pill's rounded edge; same +2mm step applied here */
   .footer__bar { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; font-size: .72rem; letter-spacing: .08em; }
