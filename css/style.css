@@ -545,9 +545,11 @@ img, svg { display: block; }
   .hero { --hero-t: 27vw; --hero-l: .74rem; --hero-comp: 0px; }
   /* gem is a corner element, not a block: smaller, partly cropped by the right edge, rising behind the AVEN wordmark
      (the title overlaps its lower part); hero height follows, so the first screen isn't half figure */
-  .hero { --fig: min(76vw, 360px); min-height: 0; padding-top: calc(var(--header-h) + var(--fig) * .56); }
+  .hero { --fig: min(76vw, 360px); min-height: 0; padding-top: calc(var(--header-h) + var(--fig) * .56 + 4mm); } /* +4mm = the 2×2mm saved by the tighter line gaps below */
   .hero__gem { --fig: inherit; right: calc(50% - var(--fig) / 2); top: calc(var(--header-h) + 2px); transform: scale(1.12); } /* centred horizontally */
-  .hero__line { margin-top: calc(5mm - .4 * var(--hero-s) - .17em); letter-spacing: .14em; align-items: center; gap: 10px; } /* small line: the 9px bullet sets its top, .17em */
+  /* visible line gaps 3mm here (5mm on desktop); the text block drops by the 2×2mm saved, so WORKING… stays where it was */
+  .hero__sub { margin-top: calc(3mm - .068 * var(--hero-t) - .35em); }
+  .hero__line { margin-top: calc(3mm - .4 * var(--hero-s) - .17em); letter-spacing: .14em; align-items: center; gap: 10px; } /* small line: the 9px bullet sets its top, .17em */
   .hero__line::before { width: 20px; }
   .hero__in { top: calc(2mm + 20px); } /* text block sits closer to the hero's bottom line (40px → 20px); hero height unchanged */
 
@@ -567,11 +569,14 @@ img, svg { display: block; }
   .vdots i.is-on { background: var(--accent); border-color: var(--accent); transform: rotate(45deg) scale(1.25); }
 
   .steps { border-bottom: 1px solid var(--line-2); } /* closing line under N°03 (mobile only) */
-  .what__side { margin-top: calc(var(--step-pad) - 24px); } /* AT THE SAME TIME sits one step-gap under that line (minus the .what grid gap) */
+  .what__side { margin-top: calc(var(--step-pad) - 24px - 10px); } /* AT THE SAME TIME ~12px under that line (minus the .what grid gap) */
+  #what .title { margin-top: 0; } /* no extra 10mm above WHAT WE DO on mobile: same air as above FTDs GENERATED */
   .gets { grid-template-columns: 1fr; }
   .step { grid-template-columns: 56px 1fr; gap: 12px; }
 
-  .footer__kicker { left: 0; top: -4px; } /* centred over the button with clear air above it (desktop keeps its offset) */
+  /* column shrinks to the button's width and stays centred; LET'S TALK starts at the button's left edge, ~10px above it */
+  .footer__cta { justify-content: center; justify-items: start; }
+  .footer__kicker { left: 0; top: 6px; }
   .btn--tg { min-height: 64px; padding: 12px 22px; gap: 12px; }
   .btn--tg__icon { width: 24px; height: 24px; left: -.5mm; } /* desktop offset −3mm would crowd the pill's rounded edge; same +2mm step applied here */
   .footer__bar { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; font-size: .72rem; letter-spacing: .08em; }
