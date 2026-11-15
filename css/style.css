@@ -549,6 +549,7 @@ img, svg { display: block; }
   .hero__gem { --fig: inherit; right: calc(50% - var(--fig) / 2); top: calc(var(--header-h) + 2px); transform: scale(1.12); } /* centred horizontally */
   .hero__line { margin-top: calc(5mm - .4 * var(--hero-s) - .17em); letter-spacing: .14em; align-items: center; gap: 10px; } /* small line: the 9px bullet sets its top, .17em */
   .hero__line::before { width: 20px; }
+  .hero__in { top: calc(2mm + 20px); } /* text block sits closer to the hero's bottom line (40px → 20px); hero height unchanged */
 
   .manifest { grid-column: 1 / -1; }
 
@@ -565,10 +566,12 @@ img, svg { display: block; }
   .vdots i { width: 7px; height: 7px; border: 1px solid var(--ink-3); transform: rotate(45deg); transition: background .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease); }
   .vdots i.is-on { background: var(--accent); border-color: var(--accent); transform: rotate(45deg) scale(1.25); }
 
-  .what__side { margin-top: 32px; }
+  .steps { border-bottom: 1px solid var(--line-2); } /* closing line under N°03 (mobile only) */
+  .what__side { margin-top: calc(var(--step-pad) - 24px); } /* AT THE SAME TIME sits one step-gap under that line (minus the .what grid gap) */
   .gets { grid-template-columns: 1fr; }
   .step { grid-template-columns: 56px 1fr; gap: 12px; }
 
+  .footer__kicker { left: 0; top: -4px; } /* centred over the button with clear air above it (desktop keeps its offset) */
   .btn--tg { min-height: 64px; padding: 12px 22px; gap: 12px; }
   .btn--tg__icon { width: 24px; height: 24px; left: -.5mm; } /* desktop offset −3mm would crowd the pill's rounded edge; same +2mm step applied here */
   .footer__bar { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; font-size: .72rem; letter-spacing: .08em; }
