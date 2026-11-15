@@ -378,6 +378,7 @@ img, svg { display: block; }
 .map__dots { fill: #4a5d78; }
 .map__dots circle { transition: fill .3s; }
 .map__lit { fill: var(--accent-hi); }
+.map__lit-r, .map__glows-r { display: none; } /* per-region colours: compact map only (≤900px) */
 .map__lines line { stroke: rgba(27, 111, 214, .55); stroke-width: 1; vector-effect: non-scaling-stroke; transition: stroke .25s var(--ease); }
 .map__lines line.is-active { stroke: var(--accent-hi); stroke-width: 1.5; }
 .map__layer { position: absolute; inset: 0; }
@@ -542,9 +543,10 @@ img, svg { display: block; }
 
   /* hero is top-anchored here (height follows content), so tighter gaps need no compensation */
   .hero { --hero-t: 27vw; --hero-l: .74rem; --hero-comp: 0px; }
-  /* figure sits right under the header bar; hero height follows the figure, so no dead black band above or below it */
-  .hero { --fig: min(calc(100vh - 3cm - var(--header-full) - 24px), calc(100svh - 3cm - var(--header-full) - 24px), calc(100vw - 2 * var(--gutter))); min-height: 0; padding-top: calc(var(--header-h) + var(--fig) + 8px); }
-  .hero__gem { --fig: inherit; right: var(--gutter); top: calc(var(--header-h) - 2px); transform: scale(1.12); } /* centred full-width here: no side shift */
+  /* gem is a corner element, not a block: smaller, partly cropped by the right edge, rising behind the AVEN wordmark
+     (the title overlaps its lower part); hero height follows, so the first screen isn't half figure */
+  .hero { --fig: min(76vw, 360px); min-height: 0; padding-top: calc(var(--header-h) + var(--fig) * .56); }
+  .hero__gem { --fig: inherit; right: calc(var(--gutter) - 18vw); top: calc(var(--header-h) + 2px); transform: scale(1.12); }
   .hero__line { margin-top: calc(5mm - .4 * var(--hero-s) - .17em); letter-spacing: .14em; align-items: center; gap: 10px; } /* small line: the 9px bullet sets its top, .17em */
   .hero__line::before { width: 20px; }
 
@@ -577,11 +579,25 @@ img, svg { display: block; }
 @media (max-width: 900px) {
   /* map: markers become numbered pins, plates move into a list below */
   .plate, .map__lines { display: none; }
-  .pin { width: 20px; height: 20px; margin: -10px 0 0 -10px; display: grid; place-items: center; background: var(--bg); }
-  .pin__n { display: block; transform: rotate(-45deg); font-family: var(--font-display); font-weight: 600; font-size: 10px; line-height: 1; color: var(--ink); }
+  /* each region has its own colour (--c from REGIONS[].color): tinted live dots + glow, filled diamond pin, matching legend card */
+  .map__lit, .map__glows { display: none; }
+  .map__lit-r, .map__glows-r { display: inline; }
+  .pin {
+    width: 20px; height: 20px; margin: -10px 0 0 -10px; display: grid; place-items: center;
+    background: var(--c); border-color: var(--c);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), 0 0 18px color-mix(in srgb, var(--c) 60%, transparent);
+  }
+  .pin.is-active { background: var(--c); box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 30%, transparent), 0 0 22px color-mix(in srgb, var(--c) 70%, transparent); }
+  .pin::before { content: ""; position: absolute; inset: -1.5px; border: 1px solid var(--c); opacity: 0; pointer-events: none; }
+  .pin__n { display: block; transform: rotate(-45deg); font-family: var(--font-display); font-weight: 700; font-size: 10px; line-height: 1; color: var(--bg); }
   .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; margin-top: 32px; }
-  .legend li { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--accent); border-radius: 3px; }
-  .legend__n { grid-row: span 2; width: 22px; height: 22px; display: grid; place-items: center; border: 1.5px solid var(--accent-hi); transform: rotate(45deg); font-family: var(--font-display); font-weight: 600; font-size: 10px; }
+  .legend li {
+    display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); border-radius: 3px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 72%);
+    box-shadow: inset 2px 0 0 var(--c);
+  }
+  .legend__n { grid-row: span 2; width: 22px; height: 22px; display: grid; place-items: center; background: var(--c); color: var(--bg); box-shadow: 0 0 12px color-mix(in srgb, var(--c) 50%, transparent); transform: rotate(45deg); font-family: var(--font-display); font-weight: 700; font-size: 10px; }
   .legend__n > span { transform: rotate(-45deg); }
   .legend__name { font-family: var(--font-display); font-weight: 500; font-size: .62rem; letter-spacing: .1em; color: var(--ink-2); text-transform: uppercase; line-height: 1.2; }
   .legend__val { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
@@ -594,6 +610,16 @@ img, svg { display: block; }
   .form-strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 }
 
-@media (max-width: 380px) {
-  .legend { grid-template-columns: 1fr 1fr; }
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .pin::before { animation: pin-pulse 3.2s var(--ease) infinite; }
+  .map__layer .pin:nth-of-type(2n)::before { animation-delay: 1.1s; }
+  .map__layer .pin:nth-of-type(3n)::before { animation-delay: 2.1s; }
+}
+@keyframes pin-pulse { 0% { opacity: .9; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(2.2); } }
+
+@media (max-width: 760px) {
+  /* 2 columns instead of a long single stack; the 7th card spans the row so the grid has no hole */
+  .legend { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px; }
+  .legend li { padding: 11px 12px; column-gap: 10px; }
+  .legend li:last-child { grid-column: 1 / -1; }
 }

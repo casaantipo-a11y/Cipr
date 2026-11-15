@@ -17,17 +17,18 @@
     { name: 'ESPORTS', icon: 'esports' },
   ];
 
-  // TODO: цифры — заглушки (00K+), клиент пришлёт свои. Менять только поле value.
+  // value = цифра на плашке / в легенде
+  // color = цвет региона на мобильной карте (≤900px); десктоп остаётся синим
   // dot   = точка региона на карте (координаты viewBox 950×560)
   // plate = центр плашки на карте (десктоп)
   const REGIONS = [
-    { name: 'USA + CANADA',      value: '00K+', dot: [190, 165], plate: [118, 300] },
-    { name: 'LATIN AMERICA',     value: '00K+', dot: [272, 400], plate: [130, 440] },
-    { name: 'EUROPE',            value: '00K+', dot: [498, 140], plate: [352, 218] },
-    { name: 'CIS',               value: '00K+', dot: [640, 118], plate: [515, 42]  },
-    { name: 'AFRICA + MID EAST', value: '00K+', dot: [526, 372], plate: [420, 490] },
-    { name: 'ASIA',              value: '00K+', dot: [745, 238], plate: [872, 310] },
-    { name: 'AUSTRALIA',         value: '00K+', dot: [815, 432], plate: [848, 508] },
+    { name: 'USA + CANADA',      value: '120K+', color: '#3B8AF0', dot: [190, 165], plate: [118, 300] },
+    { name: 'LATIN AMERICA',     value: '40K+',  color: '#22C3EE', dot: [272, 400], plate: [130, 440] },
+    { name: 'EUROPE',            value: '350K+', color: '#1B6FD6', dot: [498, 140], plate: [352, 218] },
+    { name: 'CIS',               value: '200K+', color: '#2DD4BF', dot: [640, 118], plate: [515, 42]  },
+    { name: 'AFRICA + MID EAST', value: '230K+', color: '#F0567A', dot: [526, 372], plate: [420, 490] },
+    { name: 'ASIA',              value: '230K+', color: '#9B6BFF', dot: [745, 238], plate: [872, 310] },
+    { name: 'AUSTRALIA',         value: '25K+',  color: '#5EE08A', dot: [815, 432], plate: [848, 508] },
   ];
 
   /* ======================================================================
@@ -113,13 +114,20 @@
       '<radialGradient id="lit-glow"><stop offset="0" stop-color="#1B6FD6" stop-opacity=".16"/><stop offset="1" stop-color="#1B6FD6" stop-opacity="0"/></radialGradient>' +
       '<mask id="lit-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="' + W + '" height="' + H + '">';
     let glows = '';
-    REGIONS.forEach((r) => {
+    // compact map (≤900px): each region lit in its own colour — one mask + one tinted copy per region (hidden on desktop via CSS)
+    let regionMasks = '', regionLit = '', regionGlows = '';
+    REGIONS.forEach((r, i) => {
       defs += '<circle cx="' + r.dot[0] + '" cy="' + r.dot[1] + '" r="' + LIT_R + '" fill="url(#lit-fade)"/>';
       glows += '<circle cx="' + r.dot[0] + '" cy="' + r.dot[1] + '" r="' + (LIT_R * 1.5) + '" fill="url(#lit-glow)"/>';
+      const RR = LIT_R * 1.5; // wider on the compact map, so the colour reads around the pin on a phone
+      regionMasks += '<mask id="lit-mask-' + i + '" maskUnits="userSpaceOnUse" x="' + (r.dot[0] - RR) + '" y="' + (r.dot[1] - RR) + '" width="' + (RR * 2) + '" height="' + (RR * 2) + '">' +
+        '<circle cx="' + r.dot[0] + '" cy="' + r.dot[1] + '" r="' + RR + '" fill="url(#lit-fade)"/></mask>';
+      regionLit += '<use class="map__lit-r" href="#dots" mask="url(#lit-mask-' + i + ')" style="fill:' + r.color + '"/>';
+      regionGlows += '<circle cx="' + r.dot[0] + '" cy="' + r.dot[1] + '" r="' + (LIT_R * 1.6) + '" fill="' + r.color + '" fill-opacity=".14" filter="url(#lit-blur)"/>';
     });
-    defs += '</mask></defs>';
-    dotsSvg.insertAdjacentHTML('afterbegin', defs + '<g class="map__glows">' + glows + '</g>');
-    dotsSvg.insertAdjacentHTML('beforeend', '<use class="map__lit" href="#dots" mask="url(#lit-mask)"/>');
+    defs += '</mask>' + regionMasks + '<filter id="lit-blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter></defs>';
+    dotsSvg.insertAdjacentHTML('afterbegin', defs + '<g class="map__glows">' + glows + '</g><g class="map__glows-r">' + regionGlows + '</g>');
+    dotsSvg.insertAdjacentHTML('beforeend', '<use class="map__lit" href="#dots" mask="url(#lit-mask)"/>' + regionLit);
 
     REGIONS.forEach((r, i) => {
       const line = document.createElementNS(SVGNS, 'line');
@@ -129,6 +137,7 @@
 
       const pin = document.createElement('span');
       pin.className = 'pin';
+      pin.style.setProperty('--c', r.color);
       pin.style.left = pct(r.dot[0], W); pin.style.top = pct(r.dot[1], H);
       pin.innerHTML = '<span class="pin__n">' + (i + 1) + '</span>';
       layer.appendChild(pin);
@@ -148,6 +157,7 @@
       pin.addEventListener('mouseleave', () => set(false));
 
       const li = document.createElement('li');
+      li.style.setProperty('--c', r.color);
       li.innerHTML = '<span class="legend__n"><span>' + (i + 1) + '</span></span><span class="legend__name"></span><span class="legend__val"></span>';
       li.querySelector('.legend__name').textContent = r.name;
       li.querySelector('.legend__val').textContent = r.value;
