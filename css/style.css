@@ -576,7 +576,7 @@ img, svg { display: block; }
 
   /* column shrinks to the button's width and stays centred; LET'S TALK starts at the button's left edge, ~10px above it */
   .footer__cta { justify-content: center; justify-items: start; }
-  .footer__kicker { left: 0; top: 6px; }
+  .footer__kicker { left: 5mm; top: calc(6px + 1mm); }
   .btn--tg { min-height: 64px; padding: 12px 22px; gap: 12px; }
   .btn--tg__icon { width: 24px; height: 24px; left: -.5mm; } /* desktop offset −3mm would crowd the pill's rounded edge; same +2mm step applied here */
   .footer__bar { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 14px; font-size: .72rem; letter-spacing: .08em; }
